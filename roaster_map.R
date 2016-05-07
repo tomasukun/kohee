@@ -1,37 +1,23 @@
 #!/usr/bin/env Rscript
 
 ### -------------   Leaflet of Coffee Exchange Map   --------------- ###
-# Author: Thomas U. Aguilar
-# Date: 10-21-2015
 # function: roaster_map
 # @params: path 
-#	(e.g. "C:/Users/taguilar/Dropbox/Coffee Maps/Coffee_Roaster_Directory_US.txt")
 
 roaster_map <- function(path = NULL){
+  # fatal errors
 	if(is.null(path)){
-	  stop("specify path to 'Coffee_Roaster_Directory_US.txt'")
+	  stop("specify path")
 	}
-	if(!require(rleafmap)) {
-		install.packages("rleafmap",
-		 repos = 'http://cran.us.r-project.org', dependencies = TRUE)
-		suppressPackageStartupMessages(require(rleafmap))
-	} else{
-		suppressPackageStartupMessages(require(rleafmap))
-	}
-	if(!require(sp)) {
-		install.packages("sp",
-		 repos = 'http://cran.us.r-project.org', dependencies = TRUE)
-		suppressPackageStartupMessages(require(sp))
-	} else{
-		suppressPackageStartupMessages(require(sp))
-	}
-	if(!require(dplyr)) {
-		install.packages("dplyr",
-		 repos = 'http://cran.us.r-project.org')
-		suppressPackageStartupMessages(require(dplyr))
-	} else{
-		suppressPackageStartupMessages(require(dplyr))
-	}
+  # required packages
+  packages_needed <- c("rleafmap", "sp", "dplyr")
+  install_packages <- packages_needed[!(packages_needed %in% installed.packages()[,"Package"])]
+  if(length(install_packages) > 0){
+    install.packages(install_packages)
+  }
+  for(p in packages_needed){
+    library(p, character.only = TRUE)
+  }
 
 	# base layer map
 	#stamen.bm <- basemap("stamen.toner")
