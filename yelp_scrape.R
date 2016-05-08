@@ -84,7 +84,8 @@ yelp_scrape <- function(url = 'http://www.yelp.com/search?find_desc=',
 
   # - Outputting Parsed Data - #
   out_file <- data.frame(business = businesses, geocodes)
-  path_files <- list.files(path = out_path, full.names = TRUE)
+  out_path_end <- max(str_locate_all(out_path, '\\/')[[1]][,2])
+  path_files <- list.files(path = str_sub(out_path, start = 1, out_path_end), full.names = TRUE)
   if(out_path %in% path_files){
   	write_csv(out_file, out_path, append = TRUE)
   } else{
