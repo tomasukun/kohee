@@ -53,7 +53,7 @@ yelp_scrape <- function(url = 'http://www.yelp.com/search?find_desc=',
     location, '&start=', pagestart, sep = "")))
 	url <- read_html(url_cat)
   html_page <- html_nodes(url, paste(".", 'biz-name', sep = ""))
-  businesses <- html_text(html_page)
+  Name <- html_text(html_page)
 
   html_page <- html_nodes(url, paste( ".", 'neighborhood-str-list', sep = ""))
   Neighborhood <- html_text(html_page)
@@ -68,22 +68,30 @@ yelp_scrape <- function(url = 'http://www.yelp.com/search?find_desc=',
   Address_mess <- gsub(phone_patt, "", Address_mess)
   phone_patt <- "([0-9]{3})\\-([0-9]{4})"
   Address_mess <- gsub(phone_patt, "", Address_mess)
-  Address_clean <- character(length(Address_mess))
-  Address_start <- gregexpr(pattern = "\\d", Address_mess, ignore.case = TRUE)[[1]][1]
-
-  for(i in seq_along(Address_mess)){
-  	Address_clean[i] <- str_trim(
-  		substr(Address_mess[i],
-  			gregexpr(pattern = "\\d", Address_mess, ignore.case = TRUE)[[i]][1], nchar(Address_mess)[i]
-  		)
-  	)
-  }
-
+  
+  # final clean address function
+  address_clean_f <- Vectorize(function(dirt_addy){
+    clean_addy <- dirt_addy %>% 
+      str_sub(str_locate(dirt_addy, '\\d')[[1]], nchar(dirt_addy)) %>% 
+      str_replace(pattern = location, replacement = str_c(", ", location)) %>% 
+      str_trim()
+    return(clean_addy)
+  }, USE.NAMES = FALSE)
+    
   # - Geocoding Addresses - #
-  geocodes <- geocode(Address_clean, output="latlona")
-
+  geocodes <- address_clean_f(Address_mess) %>% 
+    geocode(output="latlona") %>% 
+    mutate(address = as.character(address))
+    
+  out_file <- geocodes %>% 
+    mutate(Name = Name, Address = str_sub(address, 1, (str_locate(address, ',')[,1]-1)), 
+           City_State_ZIP = str_sub(address, (str_locate(address, ',')[,1] + 2), str_length(address)), 
+           Country = rep('United States', length(Name)), URL = rep('', length(Name)), 
+           long = lon, lat = lat) %>% 
+    select(Name, Address, City_State_ZIP, Country, URL, long, lat, -address)
+    
   # - Outputting Parsed Data - #
-  out_file <- data.frame(business = businesses, geocodes)
+  out_file <- data.frame(Name = Name, geocodes)
   out_path_end <- max(str_locate_all(out_path, '\\/')[[1]][,2])
   path_files <- list.files(path = str_sub(out_path, start = 1, (out_path_end-1)), full.names = TRUE)
   if(out_path %in% path_files){
