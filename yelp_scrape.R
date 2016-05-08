@@ -4,7 +4,7 @@
 # Program: yelp_scrape
 # @params: 1. url
 # @params: 2. out_path
-# e.g. yelp_scrape(search_term = "coffee roasters", location = "Oakland, CA", pagestart = 10,
+# e.g. yelp_scrape(search_term = "coffee roaster", location = "Oakland, CA", pagestart = 10,
 #     out_path = '~/Dropbox/Coffee Maps/CoffeeRoasters_Oakland_Yelp.csv')
 
 
@@ -84,7 +84,7 @@ yelp_scrape <- function(url = 'http://www.yelp.com/search?find_desc=',
 
   # - Outputting Parsed Data - #
   out_file <- data.frame(business = businesses, geocodes)
-  path_files <- list.files(path = "/Users/Tom/Dropbox/Coffee Maps", full.names = TRUE)
+  path_files <- list.files(path = out_path, full.names = TRUE)
   if(out_path %in% path_files){
   	write_csv(out_file, out_path, append = TRUE)
   } else{
