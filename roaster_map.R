@@ -2,15 +2,16 @@
 
 ### -------------   Leaflet of Coffee Exchange Map   --------------- ###
 # function: roaster_map
-# @params: path 
+# @params: path (default: NULL)
+# @params: city (default: NULL)
 
-roaster_map <- function(path = NULL){
+roaster_map <- function(path = NULL, city = NULL){
   # fatal errors
 	if(is.null(path)){
 	  stop("specify path")
 	}
   # required packages
-  packages_needed <- c("rleafmap", "sp", "dplyr")
+  packages_needed <- c("rleafmap", "sp", "dplyr", "readr", "stringr")
   install_packages <- packages_needed[!(packages_needed %in% installed.packages()[,"Package"])]
   if(length(install_packages) > 0){
     install.packages(install_packages)
@@ -23,10 +24,17 @@ roaster_map <- function(path = NULL){
 	#stamen.bm <- basemap("stamen.toner")
 	bm <- basemap(paste('https://a.tiles.mapbox.com/v3/',
 		'eleanor.ipncow29/{z}/{x}/{y}.png', sep = ""))
-
-	# Coffee Roasters in US
-	roasters <- read.csv(path, header = TRUE, stringsAsFactors = FALSE, sep = ",")
-	roasters <- rename(roasters, lon = long)
+  
+	if(is.null(city)){
+	  # Coffee Roasters in US
+	  roasters <- read_csv(path)
+	  roasters <- rename(roasters, lon = long)
+	} else{
+	  # Coffee Roasters in region specified
+	  roasters <- read_csv(path) %>% 
+	    filter(str_detect(City_State_Zip, city))
+	  roasters <- rename(roasters, lon = long)
+	}
 
 	# Creating Spatial points of Roasters
 	coordinates(roasters) <- ~lon+lat
@@ -34,8 +42,9 @@ roaster_map <- function(path = NULL){
 	  popup = roasters$Name)
 
 	# writing leaflet
-	writeMap(bm, roasters_map, width = 1000, height = 700,
-		setView = c(39.5, -98.35), setZoom = 4, directView = "browser")
+	writeMap(bm, roasters_map, width = 1100, height = 800,
+		setView = c(median(roasters_map$lat, na.rm = TRUE), median(roasters_map$long, na.rm = TRUE)), 
+		setZoom = 4, directView = "browser")
 
 }
 
