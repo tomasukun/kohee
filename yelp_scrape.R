@@ -91,7 +91,6 @@ yelp_scrape <- function(url = 'http://www.yelp.com/search?find_desc=',
     select(Name, Address, City_State_ZIP, Country, URL, long, lat, -address)
     
   # - Outputting Parsed Data - #
-  out_file <- data.frame(Name = Name, geocodes)
   out_path_end <- max(str_locate_all(out_path, '\\/')[[1]][,2])
   path_files <- list.files(path = str_sub(out_path, start = 1, (out_path_end-1)), full.names = TRUE)
   if(out_path %in% path_files){
