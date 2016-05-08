@@ -27,12 +27,14 @@ roaster_map <- function(path = NULL, city = NULL){
   
 	if(is.null(city)){
 	  # Coffee Roasters in US
-	  roasters <- read_csv(path)
-	  roasters <- rename(roasters, lon = long)
+	  roasters <- read_csv(path) %>% 
+	    as.data.frame()
+	  roasters <- rename(roasters, lon = long) 
 	} else{
 	  # Coffee Roasters in region specified
 	  roasters <- read_csv(path) %>% 
-	    filter(str_detect(City_State_Zip, city))
+	    filter(str_detect(City_State_ZIP, city)) %>% 
+	    as.data.frame()
 	  roasters <- rename(roasters, lon = long)
 	}
 
